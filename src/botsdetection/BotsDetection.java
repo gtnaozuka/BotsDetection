@@ -13,8 +13,8 @@ public class BotsDetection {
         //--------------------PRE-PROCESSAMENTO--------------------
         /*
          ArrayList<User>[] users = new ArrayList[2];
-         users[User.DB_BOTS] = FileOperations.readPosts(FileOperations.DB_BOTS_PATH);
-         users[User.DB_HUMANS] = FileOperations.readPosts(FileOperations.DB_HUMANS_PATH);
+         users[User.BOTS] = FileOperations.readUsers(FileOperations.DB_BOTS_PATH, true);
+         users[User.HUMANS] = FileOperations.readUsers(FileOperations.DB_HUMANS_PATH, false);
         
          Preprocessing p = new Preprocessing(users);
          p.run();
@@ -24,11 +24,11 @@ public class BotsDetection {
 
         //--------------------EXTRACAO DE CARACTERISTICAS--------------------
         /*
-         ArrayList<User>[] users = new ArrayList[4];
-         users[User.DB_BOTS] = FileOperations.readPosts(FileOperations.DB_BOTS_PATH);
-         users[User.DB_HUMANS] = FileOperations.readPosts(FileOperations.DB_HUMANS_PATH);
-         users[User.PROCESSED_BOTS] = FileOperations.readPosts(FileOperations.PROCESSED_BOTS_PATH);
-         users[User.PROCESSED_HUMANS] = FileOperations.readPosts(FileOperations.PROCESSED_HUMANS_PATH);
+         ArrayList<User>[] users = new ArrayList[2];
+         users[User.BOTS] = FileOperations.readUsers(FileOperations.DB_BOTS_PATH, true);
+         users[User.HUMANS] = FileOperations.readUsers(FileOperations.DB_HUMANS_PATH, false);
+         FileOperations.readProcessedUsers(users[User.BOTS], FileOperations.PROCESSED_BOTS_PATH);
+         FileOperations.readProcessedUsers(users[User.HUMANS], FileOperations.PROCESSED_HUMANS_PATH);
         
          FeaturesExtractor fe = new FeaturesExtractor(users);
          fe.run();
@@ -39,11 +39,8 @@ public class BotsDetection {
         //--------------------SISTEMA IMUNOLOGICO ARTIFICIAL--------------------
         ///*
         ArrayList<User>[] users = new ArrayList[2];
-        users[User.SELF] = FileOperations.readFeatures(FileOperations.FEATURES_HUMANS_PATH, false);
-        users[User.DATABASE] = FileOperations.readFeatures(FileOperations.FEATURES_BOTS_PATH, true);
-
-        users[User.DATABASE].addAll(users[User.SELF]);
-        users[User.SELF] = new ArrayList<>(users[User.SELF].subList(0, NegativeSelection.QTD_DETECTORS));
+        users[User.DATABASE] = FileOperations.readFeatures();
+        users[User.SELF] = splitSelf(users[User.DATABASE]);
         users[User.DATABASE].removeAll(users[User.SELF]);
 
         NegativeSelection nsa = new NegativeSelection(users);
@@ -53,5 +50,16 @@ public class BotsDetection {
         nsa.extractFile();
         //*/
         //----------------------------------------------------------------------
+    }
+    
+    private static ArrayList<User> splitSelf(ArrayList<User> dbUsers) {
+        ArrayList<User> selfUsers = new ArrayList<>();
+        
+        for (User u : dbUsers) {
+            if (!u.isBot())
+                selfUsers.add(u);
+        }
+        
+        return new ArrayList<>(selfUsers.subList(0, NegativeSelection.QTD_DETECTORS));
     }
 }

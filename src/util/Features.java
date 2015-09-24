@@ -1,52 +1,40 @@
 package util;
 
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Features {
 
-    private Integer type;
-    private double value;
-    private static final HashMap<Integer, String> filenames;
-
-    public static final Integer LEXICO = 0, CORPUS = 1, QTD_CITACOES = 2,
-            QTD_LINKS = 3, QTD_HASHTAGS = 4, AVG_CITACOES = 5, AVG_LINKS = 6,
-            AVG_HASHTAGS = 7;
-    public static final int TOTAL = 8;
-
-    static {
-        filenames = new HashMap<>();
-        filenames.put(LEXICO, "LEXICO");
-        filenames.put(CORPUS, "CORPUS");
-        filenames.put(QTD_CITACOES, "QTD_CITACOES");
-        filenames.put(QTD_LINKS, "QTD_LINKS");
-        filenames.put(QTD_HASHTAGS, "QTD_HASHTAGS");
-        filenames.put(AVG_CITACOES, "AVG_CITACOES");
-        filenames.put(AVG_LINKS, "AVG_LINKS");
-        filenames.put(AVG_HASHTAGS, "AVG_HASHTAGS");
+    public static final String LEXICO = "lexico", CORPUS = "corpus", 
+            QTD_CITACOES = "qtd_citacoes", QTD_LINKS = "qtd_links", 
+            QTD_HASHTAGS = "qtd_hashtags", AVG_CITACOES = "avg_citacoes", 
+            AVG_LINKS = "avg_links", AVG_HASHTAGS = "avg_hashtags", 
+            LEXICO_RAW = "lexico_raw", CORPUS_RAW = "corpus_raw", 
+            AVG_TERMS = "avg_terms";
+    public static final int TOTAL = 11;
+    
+    public static int lexico(String tweet) {
+        Set<String> set = new HashSet<>();
+        set.addAll(Arrays.asList(tweet.split(" ")));
+        return set.size();
     }
 
-    public Features(Integer type, double value) {
-        this.type = type;
-        this.value = value;
+    public static int corpus(String tweet) {
+        return tweet.split(" ").length;
     }
 
-    public Integer getType() {
-        return type;
+    public static int citacoes(String tweet) {
+        return tweet.split("@(?<arroba>[A-Za-z0-9]+)").length - 1;
     }
 
-    public void setType(Integer type) {
-        this.type = type;
+    public static int links(String tweet) {
+        return tweet.split(
+                "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
+        ).length - 1;
     }
 
-    public double getValue() {
-        return value;
-    }
-
-    public void setValue(double value) {
-        this.value = value;
-    }
-
-    public static String getFilename(Integer type) {
-        return filenames.get(type) + FileOperations.EXTENSION;
+    public static int hashtags(String tweet) {
+        return tweet.split("#(?<hashtag>[A-Za-z0-9]+)").length - 1;
     }
 }

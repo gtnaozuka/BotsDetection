@@ -1,10 +1,10 @@
 package featuresextractor;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedHashMap;
 import util.Features;
 import util.FileOperations;
+import util.Post;
 import util.User;
 
 public class FeaturesExtractor {
@@ -16,106 +16,51 @@ public class FeaturesExtractor {
     }
 
     public void run() {
-        //run(users[User.DB_BOTS]);
-        //run(users[User.DB_HUMANS]);
-        run(users[User.PROCESSED_BOTS]);
-        run(users[User.PROCESSED_HUMANS]);
+        run(users[User.BOTS]);
+        run(users[User.HUMANS]);
     }
 
     private void run(ArrayList<User> users) {
         for (User u : users) {
             int lexico = 0, corpus = 0, citacoes = 0, links = 0,
-                    hashtags = 0;
-            for (String p : u.getPosts()) {
-                lexico += lexico(p);
-                corpus += corpus(p);
-                citacoes += citacoes(p);
-                links += links(p);
-                hashtags += hashtags(p);
+                    hashtags = 0, lexicoRaw = 0, corpusRaw = 0;
+            
+            for (Post p : u.getProcessedPosts()) {
+                lexico += Features.lexico(p.getTweet());
+                corpus += Features.corpus(p.getTweet());
+                citacoes += Features.citacoes(p.getTweet());
+                links += Features.links(p.getTweet());
+                hashtags += Features.hashtags(p.getTweet());
             }
-
-            ArrayList<Features> features = new ArrayList<>();
-            features.add(new Features(Features.LEXICO, lexico));
-            features.add(new Features(Features.CORPUS, corpus));
-            features.add(new Features(Features.QTD_CITACOES, citacoes));
-            features.add(new Features(Features.QTD_LINKS, links));
-            features.add(new Features(Features.QTD_HASHTAGS, hashtags));
-            features.add(new Features(Features.AVG_CITACOES, (double) citacoes
-                    / u.getPosts().size()));
-            features.add(new Features(Features.AVG_LINKS, (double) links
-                    / u.getPosts().size()));
-            features.add(new Features(Features.AVG_HASHTAGS, (double) hashtags
-                    / u.getPosts().size()));
+            
+            for (Post p : u.getPosts()) {
+                lexicoRaw += Features.lexico(p.getTweet());
+                corpusRaw += Features.corpus(p.getTweet());
+            }
+            
+            LinkedHashMap<String, Double> features = new LinkedHashMap<>();
+            features.put(Features.LEXICO, (double) lexico);
+            features.put(Features.CORPUS, (double) corpus);
+            features.put(Features.QTD_CITACOES, (double) citacoes);
+            features.put(Features.QTD_LINKS, (double) links);
+            features.put(Features.QTD_HASHTAGS, (double) hashtags);
+            features.put(Features.AVG_CITACOES, (double) citacoes
+                    / u.getProcessedPosts().size());
+            features.put(Features.AVG_LINKS, (double) links
+                    / u.getProcessedPosts().size());
+            features.put(Features.AVG_HASHTAGS, (double) hashtags
+                    / u.getProcessedPosts().size());
+            features.put(Features.LEXICO_RAW, (double) lexicoRaw);
+            features.put(Features.CORPUS_RAW, (double) corpusRaw);
+            features.put(Features.AVG_TERMS, (double) corpus
+                    / u.getProcessedPosts().size());
             u.setFeatures(features);
         }
     }
 
     public void extractFiles() {
-        FileOperations.writeFeaturesByUser(FileOperations.FEATURES_BOTS_PATH,
-                users[User.PROCESSED_BOTS]);
-        FileOperations.writeFeaturesByUser(FileOperations.FEATURES_HUMANS_PATH,
-                users[User.PROCESSED_HUMANS]);
-
-        ArrayList<User> concat = new ArrayList<>(users[User.PROCESSED_BOTS]);
-        concat.addAll(users[User.PROCESSED_HUMANS]);
-        FileOperations.writeUsersByFeature(concat);
-    }
-
-    private int lexico(String texto) {
-        int qtdLexico = 0;
-        Map<String, Integer> mapaFreq = new HashMap<>();
-        for (String palavra : texto.split("\\s+")) {
-            if (!mapaFreq.containsKey(palavra)) {
-                mapaFreq.put(palavra, 1);
-            } else {
-                mapaFreq.put(palavra, 1 + mapaFreq.get(palavra));
-            }
-        }
-        for (Map.Entry<String, Integer> entrada : mapaFreq.entrySet()) {
-            if (entrada.getValue() == 1) {
-                qtdLexico++;
-            }
-        }
-        return qtdLexico;
-    }
-
-    private int corpus(String texto) {
-        String[] pedacos = texto.split(" ");
-        return pedacos.length;
-    }
-
-    private int citacoes(String texto) {
-        int qtdCitacoes = 0, cont = 0;
-        while (cont < texto.length()) {
-            if (texto.charAt(cont) == '@') {
-                qtdCitacoes++;
-            }
-            cont++;
-        }
-        return qtdCitacoes;
-    }
-
-    private int links(String texto) {
-        int qtdLinks = 0, cont = 0;
-        String procurar = "http";
-        String[] pedacos = texto.split(" ");
-        while (cont < pedacos.length) {
-            if ((pedacos[cont].toLowerCase().contains(procurar.toLowerCase()))) {
-                qtdLinks++;
-            }
-            cont++;
-        }
-        return qtdLinks;
-    }
-
-    private int hashtags(String texto) {
-        int qtdHashTags = 0, cont = 0;
-        while (cont < texto.length()) {
-            if (texto.charAt(cont) == '#') {
-                qtdHashTags++;
-            }
-            cont++;
-        }
-        return qtdHashTags;
+        ArrayList<User> concat = new ArrayList<>(users[User.BOTS]);
+        concat.addAll(users[User.HUMANS]);
+        FileOperations.writeFeatures(concat);
     }
 }

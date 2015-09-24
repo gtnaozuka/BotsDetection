@@ -1,17 +1,17 @@
 package util;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class User {
 
     private String name;
-    private ArrayList<String> posts;
-    private ArrayList<Features> features;
+    private ArrayList<Post> posts, processedPosts;
+    private LinkedHashMap<String, Double> features;
     private boolean bot;
 
-    public static final int DB_BOTS = 0, DB_HUMANS = 1, PROCESSED_BOTS = 2,
-            PROCESSED_HUMANS = 3;
-    public static final int SELF = 0, DATABASE = 1;
+    public static final int BOTS = 0, HUMANS = 1;
+    public static final int DATABASE = 0, SELF = 1;
 
     public void setName(String name) {
         this.name = name;
@@ -21,19 +21,19 @@ public class User {
         return this.name;
     }
 
-    public ArrayList<String> getPosts() {
+    public ArrayList<Post> getPosts() {
         return posts;
     }
 
-    public void setPosts(ArrayList<String> posts) {
+    public void setPosts(ArrayList<Post> posts) {
         this.posts = posts;
     }
 
-    public void setFeatures(ArrayList<Features> features) {
+    public void setFeatures(LinkedHashMap<String, Double> features) {
         this.features = features;
     }
 
-    public ArrayList<Features> getFeatures() {
+    public LinkedHashMap<String, Double> getFeatures() {
         return features;
     }
 
@@ -43,5 +43,13 @@ public class User {
 
     public void setBot(boolean bot) {
         this.bot = bot;
+    }
+
+    public ArrayList<Post> getProcessedPosts() {
+        return processedPosts;
+    }
+
+    public void setProcessedPosts(ArrayList<Post> processedPosts) {
+        this.processedPosts = processedPosts;
     }
 }
