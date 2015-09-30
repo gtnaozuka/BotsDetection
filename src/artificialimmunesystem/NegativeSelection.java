@@ -1,26 +1,28 @@
 package artificialimmunesystem;
 
+import botsdetection.BotsDetection;
 import util.User;
 import java.util.ArrayList;
 import java.util.Random;
+import util.Classification;
 import util.Distances;
 import util.FileOperations;
 
 public class NegativeSelection {
 
     private final ArrayList<User>[] users;
-    private final ArrayList<Integer>[] classifications;
+    private final ArrayList<Classification> classifications;
+    private int tRealBots, tFakeBots, tRealHumans, tFakeHumans;
+    private double tAccuracy, tPrecision, tRecall;
 
     public static final int QTD_DETECTORS = 5;
     public static final double THRESHOLD = 0.5;
-    public static final int REAL_BOTS = 0, FAKE_BOTS = 1, REAL_HUMANS = 2, FAKE_HUMANS = 3;
 
     public NegativeSelection(ArrayList<User>[] users) {
         this.users = users;
-        this.classifications = new ArrayList[4];
-        for (int i = 0; i < 4; i++) {
-            this.classifications[i] = new ArrayList<>();
-        }
+        this.classifications = new ArrayList<>();
+        this.tRealBots = this.tFakeBots = this.tRealHumans = this.tFakeHumans = 0;
+        this.tAccuracy = this.tPrecision = this.tRecall = 0.0;
     }
 
     public void run() {
@@ -79,14 +81,40 @@ public class NegativeSelection {
             }
         }
 
-        classifications[REAL_BOTS].add(realBots);
-        classifications[FAKE_BOTS].add(fakeBots);
-        classifications[REAL_HUMANS].add(realHumans);
-        classifications[FAKE_HUMANS].add(fakeHumans);
+        Classification c = new Classification();
+        c.setRealBots(realBots);
+        c.setFakeBots(fakeBots);
+        c.setRealHumans(realHumans);
+        c.setFakeHumans(fakeHumans);
+        c.calculateStatistics();
+        classifications.add(c);
+
+        tRealBots += realBots;
+        tFakeBots += fakeBots;
+        tRealHumans += realHumans;
+        tFakeHumans += fakeHumans;
+        tAccuracy += c.getAccuracy();
+        tPrecision += c.getPrecision();
+        tRecall += c.getRecall();
     }
 
     public void extractFile() {
         FileOperations.writeClassifications(classifications);
+
+        System.out.println("Real bots (TP) mean: "
+                + (double) (tRealBots) / (double) (BotsDetection.EXECUTIONS));
+        System.out.println("Fake bots (FP) mean: "
+                + (double) (tFakeBots) / (double) (BotsDetection.EXECUTIONS));
+        System.out.println("Real humans (TN) mean: "
+                + (double) (tRealHumans) / (double) (BotsDetection.EXECUTIONS));
+        System.out.println("Fake humans (FN) mean: "
+                + (double) (tFakeHumans) / (double) (BotsDetection.EXECUTIONS));
+        System.out.println("Accuracy (ACC) mean: "
+                + (double) (tAccuracy) / (double) (BotsDetection.EXECUTIONS));
+        System.out.println("Precision (PPV) mean: "
+                + (double) (tPrecision) / (double) (BotsDetection.EXECUTIONS));
+        System.out.println("Recall (NPV) mean: "
+                + (double) (tRecall) / (double) (BotsDetection.EXECUTIONS));
     }
 
     public static String getFilename() {

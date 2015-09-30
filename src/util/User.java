@@ -1,5 +1,6 @@
 package util;
 
+import artificialimmunesystem.NegativeSelection;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
@@ -51,5 +52,17 @@ public class User {
 
     public void setProcessedPosts(ArrayList<Post> processedPosts) {
         this.processedPosts = processedPosts;
+    }
+
+    public static ArrayList<User> splitSelf(ArrayList<User> dbUsers) {
+        ArrayList<User> selfUsers = new ArrayList<>();
+
+        for (User u : dbUsers) {
+            if (!u.isBot()) {
+                selfUsers.add(u);
+            }
+        }
+
+        return new ArrayList<>(selfUsers.subList(0, NegativeSelection.QTD_DETECTORS));
     }
 }

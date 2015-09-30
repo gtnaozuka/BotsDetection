@@ -1,19 +1,29 @@
 package util;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 public class Features {
 
-    public static final String LEXICO = "lexico", CORPUS = "corpus", 
-            QTD_CITACOES = "qtd_citacoes", QTD_LINKS = "qtd_links", 
-            QTD_HASHTAGS = "qtd_hashtags", AVG_CITACOES = "avg_citacoes", 
-            AVG_LINKS = "avg_links", AVG_HASHTAGS = "avg_hashtags", 
-            LEXICO_RAW = "lexico_raw", CORPUS_RAW = "corpus_raw", 
-            AVG_TERMS = "avg_terms";
-    public static final int TOTAL = 11;
-    
+    public static final ArrayList<String> features;
+
+    static {
+        features = new ArrayList<>();
+        features.add("lexico");
+        features.add("corpus");
+        features.add("qtd_citacoes");
+        features.add("qtd_links");
+        features.add("qtd_hashtags");
+        features.add("avg_citacoes");
+        features.add("avg_links");
+        features.add("avg_hashtags");
+        features.add("lexico_raw");
+        features.add("corpus_raw");
+        features.add("avg_terms");
+    }
+
     public static int lexico(String tweet) {
         Set<String> set = new HashSet<>();
         set.addAll(Arrays.asList(tweet.split(" ")));

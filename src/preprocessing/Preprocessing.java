@@ -210,7 +210,6 @@ public class Preprocessing {
                         newTweet += word + " ";
                     }
                 }
-                System.out.println(u.getName() + "######" + newTweet);
                 Post newPost = p;
                 newPost.setTweet(newTweet);
                 processedPosts.add(newPost);

@@ -22,6 +22,7 @@ public class FileOperations {
     public static final String PROCESSED_BOTS_PATH = "./Base de Dados Processada/B/";
     public static final String PROCESSED_HUMANS_PATH = "./Base de Dados Processada/H/";
     public static final String FEATURES_PATH = "./Caracteristicas/";
+    public static final String SELECTED_FEATURES_PATH = "./Caracteristicas Selecionadas/";
     public static final String FEATURES_FILENAME = "features.csv";
     public static final String CLASSIFICATIONS_PATH = "./Classificacoes/";
 
@@ -74,63 +75,71 @@ public class FileOperations {
         } catch (IOException ex) {
             Logger.getLogger(FileOperations.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         return posts;
     }
-    
-    private static String[] featuresTitle() {
-        String[] strings = new String[Features.TOTAL + 1];
-        
-        strings[0] = Features.LEXICO;
-        strings[1] = Features.CORPUS;
-        strings[2] = Features.QTD_CITACOES;
-        strings[3] = Features.QTD_LINKS;
-        strings[4] = Features.QTD_HASHTAGS;
-        strings[5] = Features.AVG_CITACOES;
-        strings[6] = Features.AVG_LINKS;
-        strings[7] = Features.AVG_HASHTAGS;
-        strings[8] = Features.LEXICO_RAW;
-        strings[9] = Features.CORPUS_RAW;
-        strings[10] = Features.AVG_TERMS;
-        
+
+    private static String[] featuresHeader(ArrayList<String> features) {
+        String[] strings = new String[features.size() + 1];
+
+        for (int i = 0; i < features.size(); i++) {
+            strings[i] = features.get(i);
+        }
         strings[strings.length - 1] = "class";
-        
+
         return strings;
     }
-    
+
     private static String[] featuresToStringArray(User u) {
-        String[] strings = new String[Features.TOTAL + 1];
-        
+        String[] strings = new String[u.getFeatures().size() + 1];
+
         int i = 0;
         for (Map.Entry<String, Double> entry : u.getFeatures().entrySet()) {
             strings[i] = entry.getValue().toString();
             i++;
         }
-        
-        if (u.isBot())
+
+        if (u.isBot()) {
             strings[strings.length - 1] = "bot";
-        else
+        } else {
             strings[strings.length - 1] = "human";
-        
+        }
+
         return strings;
     }
-    
-    private static LinkedHashMap<String, Double> stringArrayToFeatures(String[] strings) {
+
+    private static LinkedHashMap<String, Double> stringArrayToFeatures(String[] header, String[] strings) {
         LinkedHashMap<String, Double> features = new LinkedHashMap<>();
-        
-        features.put(Features.LEXICO, Double.valueOf(strings[0]));
-        features.put(Features.CORPUS, Double.valueOf(strings[1]));
-        features.put(Features.QTD_CITACOES, Double.valueOf(strings[2]));
-        features.put(Features.QTD_LINKS, Double.valueOf(strings[3]));
-        features.put(Features.QTD_HASHTAGS, Double.valueOf(strings[4]));
-        features.put(Features.AVG_CITACOES, Double.valueOf(strings[5]));
-        features.put(Features.AVG_LINKS, Double.valueOf(strings[6]));
-        features.put(Features.AVG_HASHTAGS, Double.valueOf(strings[7]));
-        features.put(Features.LEXICO_RAW, Double.valueOf(strings[8]));
-        features.put(Features.CORPUS_RAW, Double.valueOf(strings[9]));
-        features.put(Features.AVG_TERMS, Double.valueOf(strings[10]));
-        
+
+        for (int i = 0; i < header.length - 1; i++) {
+            features.put(header[i], Double.valueOf(strings[i]));
+        }
+
         return features;
+    }
+
+    private static String[] classificationsHeader() {
+        String[] strings = new String[Classification.classifications.size()];
+
+        for (int i = 0; i < Classification.classifications.size(); i++) {
+            strings[i] = Classification.classifications.get(i);
+        }
+
+        return strings;
+    }
+
+    private static String[] classificationsToStringArray(Classification c) {
+        String[] strings = new String[Classification.classifications.size()];
+
+        strings[0] = String.valueOf(c.getRealBots());
+        strings[1] = String.valueOf(c.getFakeBots());
+        strings[2] = String.valueOf(c.getRealHumans());
+        strings[3] = String.valueOf(c.getFakeHumans());
+        strings[4] = String.valueOf(c.getAccuracy());
+        strings[5] = String.valueOf(c.getPrecision());
+        strings[6] = String.valueOf(c.getRecall());
+
+        return strings;
     }
 
     public static ArrayList<User> readUsers(String path, boolean isBot) {
@@ -154,22 +163,23 @@ public class FileOperations {
             u.setProcessedPosts(readPosts(path + u.getName()));
         }
     }
-    
-    public static ArrayList<User> readFeatures() {
+
+    public static ArrayList<User> readFeatures(String path) {
         ArrayList<User> users = new ArrayList<>();
-        
+
         try {
-            String[] nextLine;
-            CSVReader reader = new CSVReader(new FileReader(FEATURES_PATH + FEATURES_FILENAME));
-            nextLine = reader.readNext();
+            String[] header, nextLine;
+            CSVReader reader = new CSVReader(new FileReader(path + FEATURES_FILENAME));
+            header = reader.readNext();
             while ((nextLine = reader.readNext()) != null) {
                 User u = new User();
-                u.setFeatures(stringArrayToFeatures(nextLine));
-                if (nextLine[nextLine.length - 1].equals("bot"))
+                u.setFeatures(stringArrayToFeatures(header, nextLine));
+                if (nextLine[header.length - 1].equals("bot")) {
                     u.setBot(true);
-                else
+                } else {
                     u.setBot(false);
-                
+                }
+
                 users.add(u);
             }
         } catch (FileNotFoundException ex) {
@@ -199,14 +209,14 @@ public class FileOperations {
         }
     }
 
-    public static void writeFeatures(ArrayList<User> users) {
-        File folder = new File(FEATURES_PATH);
+    public static void writeFeatures(String path, ArrayList<String> features, ArrayList<User> users) {
+        File folder = new File(path);
         if (!folder.exists()) {
             folder.mkdirs();
         }
-        
-        try (CSVWriter writer = new CSVWriter(new FileWriter(FEATURES_PATH + FEATURES_FILENAME), ',')) {
-            writer.writeNext(featuresTitle());
+
+        try (CSVWriter writer = new CSVWriter(new FileWriter(path + FEATURES_FILENAME), ',')) {
+            writer.writeNext(featuresHeader(features));
             for (User u : users) {
                 writer.writeNext(featuresToStringArray(u));
             }
@@ -216,22 +226,16 @@ public class FileOperations {
         }
     }
 
-    public static void writeClassifications(ArrayList<Integer>[] classifications) {
+    public static void writeClassifications(ArrayList<Classification> classifications) {
         File folder = new File(CLASSIFICATIONS_PATH);
         if (!folder.exists()) {
             folder.mkdirs();
         }
-        
-        try (CSVWriter writer = new CSVWriter(new FileWriter(CLASSIFICATIONS_PATH + NegativeSelection.getFilename()), ',')) {
-            for (int i = 0; i < classifications[NegativeSelection.REAL_BOTS].size(); i++) {
-                String[] strings = new String[4];
-                
-                strings[0] = classifications[NegativeSelection.REAL_BOTS].get(i).toString();
-                strings[1] = classifications[NegativeSelection.FAKE_BOTS].get(i).toString();
-                strings[2] = classifications[NegativeSelection.REAL_HUMANS].get(i).toString();
-                strings[3] = classifications[NegativeSelection.FAKE_HUMANS].get(i).toString();
 
-                writer.writeNext(strings);
+        try (CSVWriter writer = new CSVWriter(new FileWriter(CLASSIFICATIONS_PATH + NegativeSelection.getFilename()), ',')) {
+            writer.writeNext(classificationsHeader());
+            for (Classification c : classifications) {
+                writer.writeNext(classificationsToStringArray(c));
             }
             writer.close();
         } catch (IOException ex) {
