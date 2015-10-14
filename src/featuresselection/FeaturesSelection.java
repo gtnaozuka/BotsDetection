@@ -42,7 +42,7 @@ public class FeaturesSelection {
                 BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
                 int read = Integer.valueOf(br.readLine());
 
-                if (read > 0 && read < Features.features.size()) {
+                if (read > 0 && read < Features.features.size() + 1) {
                     selectedFeatures.add(Features.features.get(read - 1));
                 } else {
                     break;

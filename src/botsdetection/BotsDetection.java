@@ -35,6 +35,7 @@ public class BotsDetection {
 
             FeaturesExtractor fe = new FeaturesExtractor(users);
             fe.run();
+            fe.normalize();
             fe.extractFiles();
         */
         //-------------------------------------------------------------------

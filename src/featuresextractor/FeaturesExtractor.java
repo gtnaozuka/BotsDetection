@@ -1,7 +1,9 @@
 package featuresextractor;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import util.Features;
 import util.FileOperations;
 import util.Post;
@@ -56,6 +58,34 @@ public class FeaturesExtractor {
                     / u.getProcessedPosts().size());
             u.setFeatures(features);
         }
+    }
+
+    public void normalize() {
+        normalize(users[User.BOTS]);
+        normalize(users[User.HUMANS]);
+    }
+
+    private void normalize(ArrayList<User> users) {
+        for (User u : users) {
+            double maxValue = calculateMaxValue(u.getFeatures());
+
+            LinkedHashMap<String, Double> normalizedFeatures = new LinkedHashMap<>();
+            for (Map.Entry<String, Double> entry : u.getFeatures().entrySet()) {
+                normalizedFeatures.put(entry.getKey(), entry.getValue() / maxValue);
+            }
+            u.setFeatures(normalizedFeatures);
+        }
+    }
+
+    private double calculateMaxValue(LinkedHashMap<String, Double> features) {
+        Iterator it = features.entrySet().iterator();
+        double maxValue = ((Map.Entry<String, Double>) it.next()).getValue();
+
+        while (it.hasNext()) {
+            maxValue = Math.max(((Map.Entry<String, Double>) it.next()).getValue(), maxValue);
+        }
+
+        return maxValue;
     }
 
     public void extractFiles() {
