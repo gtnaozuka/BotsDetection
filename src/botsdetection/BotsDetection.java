@@ -1,6 +1,7 @@
 package botsdetection;
 
 import artificialimmunesystem.NegativeSelection;
+import balancing.Balancing;
 import featuresextractor.FeaturesExtractor;
 import featuresselection.FeaturesSelection;
 import java.util.ArrayList;
@@ -13,11 +14,24 @@ public class BotsDetection {
     public static final int EXECUTIONS = 10000;
 
     public static void main(String[] args) {
-        //--------------------PRE-PROCESSAMENTO--------------------
+        //--------------------BALANCEAMENTO--------------------
         /*
             ArrayList<User>[] users = new ArrayList[2];
             users[User.BOTS] = FileOperations.readUsers(FileOperations.DB_BOTS_PATH, true);
             users[User.HUMANS] = FileOperations.readUsers(FileOperations.DB_HUMANS_PATH, false);
+            
+            Balancing b = new Balancing(users);
+            b.run();
+            b.extractFiles();
+            
+        */
+        //---------------------------------------------------------
+        
+        //--------------------PRE-PROCESSAMENTO--------------------
+        /*
+            ArrayList<User>[] users = new ArrayList[2];
+            users[User.BOTS] = FileOperations.readUsers(FileOperations.BALANCED_DB_BOTS_PATH, true);
+            users[User.HUMANS] = FileOperations.readUsers(FileOperations.BALANCED_DB_HUMANS_PATH, false);
 
             Preprocessing p = new Preprocessing(users);
             p.run();
@@ -28,8 +42,8 @@ public class BotsDetection {
         //--------------------EXTRACAO DE CARACTERISTICAS--------------------
         /*
             ArrayList<User>[] users = new ArrayList[2];
-            users[User.BOTS] = FileOperations.readUsers(FileOperations.DB_BOTS_PATH, true);
-            users[User.HUMANS] = FileOperations.readUsers(FileOperations.DB_HUMANS_PATH, false);
+            users[User.BOTS] = FileOperations.readUsers(FileOperations.BALANCED_DB_BOTS_PATH, true);
+            users[User.HUMANS] = FileOperations.readUsers(FileOperations.BALANCED_DB_HUMANS_PATH, false);
             FileOperations.readProcessedUsers(users[User.BOTS], FileOperations.PROCESSED_BOTS_PATH);
             FileOperations.readProcessedUsers(users[User.HUMANS], FileOperations.PROCESSED_HUMANS_PATH);
 

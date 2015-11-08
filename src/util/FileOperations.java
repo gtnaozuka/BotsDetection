@@ -13,12 +13,16 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 public class FileOperations {
 
     public static final String EXTENSION = ".csv";
     public static final String DB_BOTS_PATH = "./Base de Dados/B/";
     public static final String DB_HUMANS_PATH = "./Base de Dados/H/";
+    public static final String BALANCED_DB_BOTS_PATH = "./Base de Dados Balanceada/B/";
+    public static final String BALANCED_DB_HUMANS_PATH = "./Base de Dados Balanceada/H/";
     public static final String PROCESSED_BOTS_PATH = "./Base de Dados Processada/B/";
     public static final String PROCESSED_HUMANS_PATH = "./Base de Dados Processada/H/";
     public static final String FEATURES_PATH = "./Caracteristicas/";
@@ -26,10 +30,12 @@ public class FileOperations {
     public static final String FEATURES_FILENAME = "features.csv";
     public static final String CLASSIFICATIONS_PATH = "./Classificacoes/";
 
+    public static final DateTimeFormatter DTF = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+
     private static Post stringArrayToPost(String[] strings) {
         Post post = new Post();
 
-        post.setTimestamp(strings[1]);
+        post.setTimestamp(DTF.parseDateTime(strings[1]));
         post.setTweet(strings[2]);
         post.setRetweetCount(Integer.parseInt(strings[3]));
         post.setLon(Double.parseDouble(strings[4]));
@@ -38,7 +44,7 @@ public class FileOperations {
         post.setName(strings[7]);
         post.setAddress(strings[8]);
         post.setType(strings[9]);
-        //post.setPlaceURL(strings[10]);
+        post.setPlaceURL(strings[10]);
 
         return post;
     }
@@ -47,7 +53,7 @@ public class FileOperations {
         String[] strings = new String[11];
 
         strings[0] = username;
-        strings[1] = post.getTimestamp();
+        strings[1] = post.getTimestamp().toString(DTF);
         strings[2] = post.getTweet();
         strings[3] = String.valueOf(post.getRetweetCount());
         strings[4] = String.valueOf(post.getLon());
@@ -56,7 +62,7 @@ public class FileOperations {
         strings[7] = post.getName();
         strings[8] = post.getAddress();
         strings[9] = post.getType();
-        //strings[10] = post.getPlaceURL();
+        strings[10] = post.getPlaceURL();
 
         return strings;
     }
@@ -191,7 +197,25 @@ public class FileOperations {
         return users;
     }
 
-    public static void writeUsers(String path, ArrayList<User> users) {
+    public static void writeBalancedUsers(String path, ArrayList<User> users) {
+        File folder = new File(path);
+        if (!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        for (User u : users) {
+            try (CSVWriter writer = new CSVWriter(new FileWriter(path + u.getName()), ',')) {
+                for (Post p : u.getPosts()) {
+                    writer.writeNext(postToStringArray(u.getName(), p));
+                }
+                writer.close();
+            } catch (IOException ex) {
+                Logger.getLogger(FileOperations.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public static void writeProcessedUsers(String path, ArrayList<User> users) {
         File folder = new File(path);
         if (!folder.exists()) {
             folder.mkdirs();

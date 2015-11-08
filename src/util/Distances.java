@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class Distances {
 
-    @SuppressWarnings("empty-statement")
     public static double euclideanDistance(LinkedHashMap<String, Double> a, LinkedHashMap<String, Double> b) {
         double sum = 0.0;
 
@@ -17,7 +16,7 @@ public class Distances {
             Double valueB = ((Map.Entry<String, Double>) itB.next()).getValue();
             sum += Math.pow(valueA - valueB, 2);
         }
-        
-        return Math.sqrt(sum / a.size());
+
+        return Math.sqrt(sum) / a.size();
     }
 }

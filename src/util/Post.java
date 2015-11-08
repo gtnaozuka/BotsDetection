@@ -1,18 +1,20 @@
 package util;
 
+import org.joda.time.DateTime;
+
 public class Post {
 
-    private String timestamp;
+    private DateTime timestamp;
     private String tweet;
     private int retweetCount;
     private double lon, lat;
     private String country, name, address, type, placeURL;
 
-    public String getTimestamp() {
+    public DateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(DateTime timestamp) {
         this.timestamp = timestamp;
     }
 

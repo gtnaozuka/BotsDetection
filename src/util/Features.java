@@ -22,7 +22,19 @@ public class Features {
         features.add("lexico_raw");
         features.add("corpus_raw");
         features.add("avg_terms");
+        features.add("avg_sentenca");
+        features.add("avg_sentenca_raw");
+        features.add("var_rt_post");
+        features.add("avg_posts_day");
+        features.add("avg_posts_week");
+        features.add("var_hour");
+        features.add("var_weekday");
+        features.add("avg_interval_posts");
     }
+
+    private static final String CITACAO_REGEX = "@(?<arroba>[A-Za-z0-9]+)";
+    private static final String HASHTAG_REGEX = "#(?<hashtag>[A-Za-z0-9]+)";
+    private static final String LINK_REGEX = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]";
 
     public static int lexico(String tweet) {
         Set<String> set = new HashSet<>();
@@ -35,16 +47,22 @@ public class Features {
     }
 
     public static int citacoes(String tweet) {
-        return tweet.split("@(?<arroba>[A-Za-z0-9]+)").length - 1;
+        return tweet.split(CITACAO_REGEX).length - 1;
     }
 
     public static int links(String tweet) {
-        return tweet.split(
-                "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
-        ).length - 1;
+        return tweet.split(LINK_REGEX).length - 1;
     }
 
     public static int hashtags(String tweet) {
-        return tweet.split("#(?<hashtag>[A-Za-z0-9]+)").length - 1;
+        return tweet.split(HASHTAG_REGEX).length - 1;
+    }
+
+    public static int sentenca(String tweet) {
+        String newTweet = tweet
+                .replaceAll(LINK_REGEX, "")
+                .replaceAll(CITACAO_REGEX, "")
+                .replaceAll(HASHTAG_REGEX, "");
+        return newTweet.split("\\p{Punct}+").length;
     }
 }

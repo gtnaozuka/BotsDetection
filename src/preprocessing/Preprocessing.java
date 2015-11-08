@@ -219,7 +219,7 @@ public class Preprocessing {
     }
 
     public void extractFiles() {
-        FileOperations.writeUsers(FileOperations.PROCESSED_BOTS_PATH, users[User.BOTS]);
-        FileOperations.writeUsers(FileOperations.PROCESSED_HUMANS_PATH, users[User.HUMANS]);
+        FileOperations.writeProcessedUsers(FileOperations.PROCESSED_BOTS_PATH, users[User.BOTS]);
+        FileOperations.writeProcessedUsers(FileOperations.PROCESSED_HUMANS_PATH, users[User.HUMANS]);
     }
 }
